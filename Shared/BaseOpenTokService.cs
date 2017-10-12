@@ -1,10 +1,6 @@
 ﻿namespace Zebble.Plugin
 {
     using System;
-    using System.Collections.Generic;
-    using System.Text;
-    using System.Threading.Tasks;
-    using OpenTok;
     using Zebble;
 
     public partial class BaseOpenTokService

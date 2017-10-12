@@ -1,43 +1,41 @@
 namespace Zebble.Plugin.Renderer
 {
     using System;
-    using UIKit;
-    using OpenTok;
-    using CoreGraphics;
-    using AVFoundation;
+    using Android.Widget;
+    using Com.Opentok.Android;
 
     public class OpenTokService : BaseOpenTokService.INativeImplementation
     {
         object syncLock = new object();
-        OTSession Session;
-        OTPublisher Publisher;
-        OTSubscriber Subscriber;
+        Session Session;
+        Publisher Publisher;
+        Subscriber Subscriber;
 
-        UIView PublisherContianer;
-        UIView SubscriberContainer;
+        Android.Content.Context Context => UIRuntime.CurrentActivity;
+
+        Android.Views.ViewGroup PublisherContianer;
+        Android.Views.ViewGroup SubscriberContainer;
 
         public void DoInitSession(string apiKey, string sessionId, string userToken)
         {
             if (Session != null) BaseOpenTokService.Current.EndSession();
 
-            Session = new OTSession(apiKey, sessionId, null);
+            Session = new Session(Context, apiKey, sessionId);
             HandleEvents();
-            Session.Init();
-            Session.ConnectWithToken(userToken, out var error);
+            Session.Connect(userToken);
         }
 
         public void DoSwapCamera()
         {
             if (Publisher == null) return;
 
-            if (Publisher.CameraPosition != AVCaptureDevicePosition.Front) Publisher.CameraPosition = AVCaptureDevicePosition.Front;
-            else Publisher.CameraPosition = AVCaptureDevicePosition.Back;
+            Publisher.CycleCamera();
         }
 
         public void DoSetPublisherContainer(object container)
         {
-            var streamContainer = ((UIView)container);
-            UIView streamView = null;
+            var streamContainer = ((Android.Views.ViewGroup)container);
+            Android.Views.View streamView = null;
 
             PublisherContianer = streamContainer;
             if (Publisher != null) streamView = Publisher.View;
@@ -47,8 +45,8 @@ namespace Zebble.Plugin.Renderer
 
         public void DoSetSubscriberContainer(object container)
         {
-            var streamContainer = ((UIView)container);
-            UIView streamView = null;
+            var streamContainer = ((Android.Views.ViewGroup)container);
+            Android.Views.View streamView = null;
 
             SubscriberContainer = streamContainer;
             if (Subscriber != null) streamView = Subscriber.View;
@@ -59,30 +57,28 @@ namespace Zebble.Plugin.Renderer
         void HandleEvents()
         {
             Session.ConnectionDestroyed += OnConnectionDestroyed;
-            Session.DidConnect += OnDidConnect;
-            Session.StreamCreated += OnStreamCreated;
-            Session.StreamDestroyed += OnStreamDestroyed;
+            Session.Connected += OnDidConnect;
+            Session.StreamReceived += OnStreamCreated;
+            Session.StreamDropped += OnStreamDestroyed;
         }
 
-        void ActivateStreamContainer(UIView container, UIView view)
+        void ActivateStreamContainer(Android.Views.ViewGroup container, Android.Views.View view)
         {
             DeactivateStreamContainer(container);
             if (container == null || view == null) return;
 
-            if (view.Superview != null) view.RemoveFromSuperview();
-            view.Frame = new CGRect(0, 0, container.Frame.Width, container.Frame.Height);
-            container.Add(view);
+            if (view.Parent != null) (view.Parent as Android.Views.ViewGroup).RemoveView(view);
+
+            var layoutParams = new FrameLayout.LayoutParams(Android.Views.ViewGroup.LayoutParams.MatchParent, Android.Views.ViewGroup.LayoutParams.MatchParent);
+            container.AddView(view, layoutParams);
         }
 
-        void DeactivateStreamContainer(UIView container)
+        void DeactivateStreamContainer(Android.Views.ViewGroup container)
         {
-            if (container == null || container.Subviews == null) return;
+            if (container == null) return;
 
-            while (container.Subviews.Length > 0)
-            {
-                var view = container.Subviews[0];
-                view.RemoveFromSuperview();
-            }
+            container.RemoveAllViews();
+            container.SetBackgroundColor(Android.Graphics.Color.Transparent);
         }
 
         public void DoOnAudioPublishingEnabledChanged(bool value)
@@ -116,41 +112,47 @@ namespace Zebble.Plugin.Renderer
                 if (Publisher != null || Session == null)
                     return;
 
-                Publisher = new OTPublisher(null, new OTPublisherSettings
-                {
-                    Name = "XamarinOpenTok",
-                    CameraFrameRate = OTCameraCaptureFrameRate.OTCameraCaptureFrameRate15FPS,
-                    CameraResolution = OTCameraCaptureResolution.High,
-                });
+                Publisher = new Publisher(Context, Environment.TickCount.ToString());
+                Publisher.SetStyle(BaseVideoRenderer.StyleVideoScale, BaseVideoRenderer.StyleVideoFill);
 
-                Session.Publish(Publisher, out var error);
+                Session.Publish(Publisher);
                 ActivateStreamContainer(PublisherContianer, Publisher.View);
             }
         }
 
-        void OnStreamCreated(object sender, OTSessionDelegateStreamEventArgs e)
+        void OnStreamCreated(object sender, Session.StreamReceivedEventArgs e)
         {
+            var stream = e.P1;
             lock (syncLock)
             {
                 if (Subscriber != null || Session == null)
                     return;
 
-                Subscriber = new OTSubscriber(e.Stream, null);
+                Subscriber = new Subscriber(Context, stream);
 
-                Subscriber.DidConnectToStream += OnSubscriberDidConnectToStream;
-                Subscriber.VideoDataReceived += OnSubscriberVideoDataReceived;
+                Subscriber.Connected += OnSubscriberDidConnectToStream;
                 Subscriber.VideoEnabled += OnSubscriberVideoEnabled;
+                Subscriber.VideoDisabled += OnSubscriberVideoDisabled;
 
-                Session.Subscribe(Subscriber, out var error);
+                Subscriber.SetStyle(BaseVideoRenderer.StyleVideoScale, BaseVideoRenderer.StyleVideoFill);
+
+                Session.Subscribe(Subscriber);
             }
         }
 
-        private void OnSubscriberVideoEnabled(object sender, OTSubscriberKitDelegateVideoEventReasonEventArgs e)
+        private void OnSubscriberVideoEnabled(object sender, Subscriber.VideoEnabledEventArgs e)
         {
-            throw new NotImplementedException();
+            lock (syncLock)
+            {
+                if (Subscriber != null && Subscriber.Stream != null && Subscriber.Stream.HasVideo)
+                    DoOnVideoSubscriptionEnabledChanged(true);
+            }
         }
 
-        void OnSubscriberVideoDataReceived(object sender, EventArgs e) => ActivateStreamContainer(SubscriberContainer, Subscriber.View);
+        private void OnSubscriberVideoDisabled(object sender, Subscriber.VideoDisabledEventArgs e)
+        {
+            DoOnVideoSubscriptionEnabledChanged(false);
+        }
 
         void OnSubscriberDidConnectToStream(object sender, EventArgs e)
         {
@@ -163,16 +165,13 @@ namespace Zebble.Plugin.Renderer
             }
         }
 
-        void OnStreamDestroyed(object sender, OTSessionDelegateStreamEventArgs e)
+        void OnStreamDestroyed(object sender, Session.StreamDroppedEventArgs e)
         {
-            PublisherContianer.InvokeOnMainThread(() =>
-            {
-                DeactivateStreamContainer(PublisherContianer);
-                DeactivateStreamContainer(SubscriberContainer);
-            });
+            DeactivateStreamContainer(PublisherContianer);
+            DeactivateStreamContainer(SubscriberContainer);
         }
 
-        void OnConnectionDestroyed(object sender, OTSessionDelegateConnectionEventArgs e) => BaseOpenTokService.Current.EndSession();
+        void OnConnectionDestroyed(object sender, Session.ConnectionDestroyedEventArgs e) => BaseOpenTokService.Current.EndSession();
 
         public void DoEndSession()
         {
@@ -183,8 +182,8 @@ namespace Zebble.Plugin.Renderer
                     if (Subscriber.SubscribeToAudio) Subscriber.SubscribeToAudio = false;
                     if (Subscriber.SubscribeToVideo) Subscriber.SubscribeToVideo = false;
 
-                    Subscriber.DidConnectToStream -= OnSubscriberDidConnectToStream;
-                    Subscriber.VideoDataReceived -= OnSubscriberVideoDataReceived;
+                    Subscriber.Connected -= OnSubscriberDidConnectToStream;
+                    Subscriber.VideoDisabled -= OnSubscriberVideoDisabled;
                     Subscriber.VideoEnabled -= OnSubscriberVideoEnabled;
 
                     Subscriber.Dispose();
@@ -202,23 +201,20 @@ namespace Zebble.Plugin.Renderer
                 if (Session != null)
                 {
                     Session.ConnectionDestroyed -= OnConnectionDestroyed;
-                    Session.DidConnect -= OnDidConnect;
-                    Session.StreamCreated -= OnStreamCreated;
-                    Session.StreamDestroyed -= OnStreamDestroyed;
+                    Session.Connected -= OnDidConnect;
+                    Session.StreamReceived -= OnStreamCreated;
+                    Session.StreamDropped -= OnStreamDestroyed;
 
                     Session.Disconnect();
                     Session.Dispose();
                     Session = null;
                 }
 
-                PublisherContianer.InvokeOnMainThread(() =>
-                {
-                    DeactivateStreamContainer(PublisherContianer);
-                    PublisherContianer = null;
+                DeactivateStreamContainer(PublisherContianer);
+                PublisherContianer = null;
 
-                    DeactivateStreamContainer(SubscriberContainer);
-                    SubscriberContainer = null;
-                });
+                DeactivateStreamContainer(SubscriberContainer);
+                SubscriberContainer = null;
             }
         }
     }
