@@ -21,12 +21,8 @@
         internal readonly AsyncEvent VideoSubscriptionEnabledChanged = new AsyncEvent();
         internal readonly AsyncEvent AudioSubscriptionEnabledChanged = new AsyncEvent();
         internal readonly AsyncEvent SubscriberVideoEnabledChanged = new AsyncEvent();
-        internal readonly AsyncEvent StreamCreated = new AsyncEvent();
-        internal readonly AsyncEvent StreamDestroyed = new AsyncEvent();
-        internal readonly AsyncEvent ConnectedToStream = new AsyncEvent();
-        internal readonly AsyncEvent VideoDataReceived = new AsyncEvent();
-        internal readonly AsyncEvent SubscriberVideoDataReceived = new AsyncEvent();
-        internal readonly AsyncEvent SubscriberConnectedToStream = new AsyncEvent();
+
+        public Action<string, string> SignalReceived;
 
         public static BaseOpenTokService Current = new BaseOpenTokService();
 
@@ -159,6 +155,11 @@
             VideoSubscriptionEnabled = false;
             AudioSubscriptionEnabled = false;
             SubscriberVideoEnabled = false;
+        }
+
+        public void SendSignallToAllSubscribers(string type, string message)
+        {
+            Implementation.DoSendSignalToAllSubscribers(type, message);
         }
     }
 }

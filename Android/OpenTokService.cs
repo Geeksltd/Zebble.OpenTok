@@ -10,6 +10,7 @@ namespace Zebble.Plugin.Renderer
         Session Session;
         Publisher Publisher;
         Subscriber Subscriber;
+        SignalListener MessageListener = new SignalListener();
 
         Android.Content.Context Context => UIRuntime.CurrentActivity;
 
@@ -60,6 +61,7 @@ namespace Zebble.Plugin.Renderer
             Session.Connected += OnDidConnect;
             Session.StreamReceived += OnStreamCreated;
             Session.StreamDropped += OnStreamDestroyed;
+            Session.SetSignalListener(MessageListener);
         }
 
         void ActivateStreamContainer(Android.Views.ViewGroup container, Android.Views.View view)
@@ -215,6 +217,21 @@ namespace Zebble.Plugin.Renderer
 
                 DeactivateStreamContainer(SubscriberContainer);
                 SubscriberContainer = null;
+            }
+        }
+
+        public void DoSendSignalToAllSubscribers(string type, string message)
+        {
+            Session.SendSignal(type, message);
+        }
+
+        public class SignalListener : Java.Lang.Object, Session.ISignalListener
+        {
+            public void Dispose() { }
+
+            public void OnSignalReceived(Session p0, string p1, string p2, Connection p3)
+            {
+                BaseOpenTokService.Current.SignalReceived?.Invoke(p1, p2);
             }
         }
     }

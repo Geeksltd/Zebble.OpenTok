@@ -18,6 +18,8 @@
         public Button MuteAudioButton = new Button().Id("MuteAudioButton");
         public Button SwapCameraButton = new Button().Id("SwapCameraButton");
 
+        public Action<string, string> MessageReceived;
+
         public string SessionId
         {
             get => sessionId; set
@@ -60,9 +62,15 @@
 
         public void OnShown()
         {
+            BaseOpenTokService.Current.SignalReceived += MessageReceived;
             BaseOpenTokService.Current.SetPublisherContainer(PublisherContianer.Native());
             BaseOpenTokService.Current.SetSubscriberContainer(SubscriberContianer.Native());
             BaseOpenTokService.Current.InitSession(sessionId, userToken);
+        }
+
+        public void SendEmojiToAll(string name)
+        {
+            BaseOpenTokService.Current.SendSignallToAllSubscribers("Emoji", name);
         }
     }
 }

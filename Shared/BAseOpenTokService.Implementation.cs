@@ -26,6 +26,7 @@ namespace Zebble.Plugin
             void DoOnVideoSubscriptionEnabledChanged(bool value);
             void DoOnAudioSubscriptionEnabledChanged(bool value);
             void DoEndSession();
+            void DoSendSignalToAllSubscribers(string type, string message);
         }
     }
 }

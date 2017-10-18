@@ -62,6 +62,12 @@ namespace Zebble.Plugin.Renderer
             Session.DidConnect += OnDidConnect;
             Session.StreamCreated += OnStreamCreated;
             Session.StreamDestroyed += OnStreamDestroyed;
+            Session.ReceivedSignalType += OnReceivedSignalType;
+        }
+
+        private void OnReceivedSignalType(object sender, OTSessionDelegateSignalEventArgs e)
+        {
+            BaseOpenTokService.Current.SignalReceived?.Invoke(e.Type, e.StringData);
         }
 
         void ActivateStreamContainer(UIView container, UIView view)
@@ -147,7 +153,7 @@ namespace Zebble.Plugin.Renderer
 
         private void OnSubscriberVideoEnabled(object sender, OTSubscriberKitDelegateVideoEventReasonEventArgs e)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         void OnSubscriberVideoDataReceived(object sender, EventArgs e) => ActivateStreamContainer(SubscriberContainer, Subscriber.View);
@@ -220,6 +226,11 @@ namespace Zebble.Plugin.Renderer
                     SubscriberContainer = null;
                 });
             }
+        }
+
+        public void DoSendSignalToAllSubscribers(string type, string message)
+        {
+            Session.SignalWithType(type, message, null, true, out var error);
         }
     }
 }
