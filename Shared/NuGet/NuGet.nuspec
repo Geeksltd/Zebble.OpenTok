@@ -6,11 +6,11 @@
     <title> OpenTok for Zebble for Xamarin</title>
     <description>{...} plugin for Zebble for Xamarin.</description>
     <iconUrl>https://raw.githubusercontent.com/{MyUserName}/{MyRepo}/.../Shared/Icon.png</iconUrl>
-    <authors>Your company...</authors>
-    <owners>Your company...</owners>
+    <authors>Geeks Ltd</authors>
+    <owners>Geeks Ltd</owners>
     <projectUrl>https://github.com/.......</projectUrl>
     <!--<licenseUrl>http://your-website.com/Licence.txt</licenseUrl>-->
-    <copyright>Copyright ©2017 | Your company...</copyright>
+    <copyright>Copyright ©2017 | Geeks Ltd</copyright>
 
     <dependencies>      
      
