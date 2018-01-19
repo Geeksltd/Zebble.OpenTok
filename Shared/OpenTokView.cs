@@ -57,7 +57,7 @@
             await Add(MuteAudioButton);
             await Add(SwapCameraButton);
 
-            await WhenShown(() => Device.UIThread.Run(() => OnShown()));
+            await WhenShown(() => Thread.UI.Run(() => OnShown()));
         }
 
         public void OnShown()

@@ -33,7 +33,7 @@
             {
                 if (videoPublishingEnabled == value) return;
                 videoPublishingEnabled = value;
-                VideoPublishingEnabledChanged.RaiseOn(Device.UIThread);
+                VideoPublishingEnabledChanged.RaiseOn(Thread.UI);
             }
         }
 
@@ -44,7 +44,7 @@
             {
                 if (audioPublishingEnabled == value) return;
                 audioPublishingEnabled = value;
-                AudioPublishingEnabledChanged.RaiseOn(Device.UIThread);
+                AudioPublishingEnabledChanged.RaiseOn(Thread.UI);
             }
         }
 
@@ -55,7 +55,7 @@
             {
                 if (videoSubscriptionEnabled == value) return;
                 videoSubscriptionEnabled = value;
-                VideoSubscriptionEnabledChanged.RaiseOn(Device.UIThread);
+                VideoSubscriptionEnabledChanged.RaiseOn(Thread.UI);
             }
         }
 
@@ -66,7 +66,7 @@
             {
                 if (audioSubscriptionEnabled == value) return;
                 audioSubscriptionEnabled = value;
-                AudioSubscriptionEnabledChanged.RaiseOn(Device.UIThread);
+                AudioSubscriptionEnabledChanged.RaiseOn(Thread.UI);
             }
         }
 
@@ -77,7 +77,7 @@
             {
                 if (subscriberVideoEnabled == value) return;
                 subscriberVideoEnabled = value;
-                SubscriberVideoEnabledChanged.RaiseOn(Device.UIThread);
+                SubscriberVideoEnabledChanged.RaiseOn(Thread.UI);
             }
         }
 
