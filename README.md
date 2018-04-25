@@ -1,4 +1,4 @@
-[logo]: https://raw.githubusercontent.com/Geeksltd/Zebble.OpenTok/master/Shared/NuGet/Icon.png "Zebble.OpenTok"
+[logo]: https://raw.githubusercontent.com/Geeksltd/Zebble.OpenTok/master/Shared/Icon.png "Zebble.OpenTok"
 
 
 ## Zebble.OpenTok
