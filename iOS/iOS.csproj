@@ -1,4 +1,5 @@
-﻿<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -41,11 +42,11 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Net.Http" />
     <Reference Include="Xamarin.iOS" />
-    <Reference Include="Xamarin.OpenTok.iOS, Version=2.12.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xamarin.OpenTok.iOS.2.12.1\lib\Xamarin.iOS10\Xamarin.OpenTok.iOS.dll</HintPath>
+    <Reference Include="Xamarin.OpenTok.iOS, Version=2.18.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xamarin.OpenTok.iOS.2.18.0\lib\Xamarin.iOS10\Xamarin.OpenTok.iOS.dll</HintPath>
     </Reference>
     <Reference Include="Zebble.iOS, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Zebble.4.4.185\lib\Xamarin.iOS10\Zebble.iOS.dll</HintPath>
+      <HintPath>..\packages\Zebble.4.5.369\lib\Xamarin.iOS10\Zebble.iOS.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

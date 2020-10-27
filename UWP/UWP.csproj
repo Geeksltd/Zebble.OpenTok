@@ -9,8 +9,8 @@
     <ProjectGuid>{AEFF27A1-7FF0-4803-8AFC-BDEE2A526F17}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Zebble.Plugin.Renderer</RootNamespace>
-    <AssemblyName>Zebble.Plugin.OpenTok.UWP</AssemblyName>
+    <RootNamespace>Zebble.OpenTok</RootNamespace>
+    <AssemblyName>Zebble.OpenTok.UWP</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
@@ -26,7 +26,7 @@
     <DefineConstants>UWP</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\lib\Zebble.Plugin.OpenTok.UWP.xml</DocumentationFile>
+    <DocumentationFile>..\lib\Zebble.OpenTok.UWP.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -40,7 +40,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x86\Debug\</OutputPath>
+    <OutputPath>..\lib\</OutputPath>
     <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
     <NoWarn>;2008;1998</NoWarn>
     <DebugType>full</DebugType>
@@ -59,7 +59,7 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <ErrorReport>prompt</ErrorReport>
     <GenerateLibraryLayout>true</GenerateLibraryLayout>
-    <DocumentationFile>..\lib\bin\x86\Release\Zebble.Plugin.OpenTok.UWP.XML</DocumentationFile>
+    <DocumentationFile>..\lib\bin\x86\Release\Zebble.OpenTok.UWP.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
     <PlatformTarget>ARM</PlatformTarget>
@@ -83,7 +83,7 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <ErrorReport>prompt</ErrorReport>
     <GenerateLibraryLayout>true</GenerateLibraryLayout>
-    <DocumentationFile>..\lib\bin\ARM\Release\Zebble.Plugin.OpenTok.UWP.XML</DocumentationFile>
+    <DocumentationFile>..\lib\bin\ARM\Release\Zebble.OpenTok.UWP.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <PlatformTarget>x64</PlatformTarget>
@@ -107,15 +107,15 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <ErrorReport>prompt</ErrorReport>
     <GenerateLibraryLayout>true</GenerateLibraryLayout>
-    <DocumentationFile>..\lib\bin\x64\Release\Zebble.Plugin.OpenTok.UWP.XML</DocumentationFile>
+    <DocumentationFile>..\lib\bin\x64\Release\Zebble.OpenTok.UWP.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
-    <Compile Include="OpenTokRenderer.cs" />
+    <Compile Include="OpenTokService.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Zebble">
-      <Version>4.4.185</Version>
+      <Version>4.5.369</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="..\Shared\Shared.projitems" Label="Shared" Condition="Exists('..\Shared\Shared.projitems')" />
@@ -137,12 +137,7 @@
     <Error Condition="!Exists('..\Shared\Shared.projitems')" Text="This project references Shared that are missing on this computer." />
   </Target>
   <PropertyGroup>
-    <PostBuildEvent>if $(PlatformName) == x86 (
-if not exist $(SolutionDir)lib\bin\Release mkdir $(SolutionDir)lib\bin\Release
-
-robocopy  $(SolutionDir)lib\bin\x86\Release $(SolutionDir)lib\bin\Release /COPYALL /E
-
-$(SolutionDir)Shared\NuGet\CorFlags.exe /32bitreq- $(SolutionDir)lib\bin\Release\Zebble.OpenTok.UWP.dll
-)</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
 </Project>
