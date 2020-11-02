@@ -19,6 +19,9 @@ namespace Zebble.Plugin.Renderer
 
         public void DoInitSession(string apiKey, string sessionId, string userToken)
         {
+            Zebble.Device.Permission.Camera.Request().RunInParallel();
+            Zebble.Device.Permission.Microphone.Request().RunInParallel();
+
             if (Session != null) BaseOpenTokService.Current.EndSession();
 
             Session = new Session(Context, apiKey, sessionId);
