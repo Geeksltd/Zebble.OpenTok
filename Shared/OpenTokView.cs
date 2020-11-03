@@ -13,10 +13,10 @@
 
         public Canvas PublisherContianer = new Canvas().Id("PublisherContianer");
         public Canvas SubscriberContianer = new Canvas().Id("SubscriberContianer");
-        public Button EndSessionButton = new Button().Id("EndSessionButton");
-        public Button MuteVideoButton = new Button().Id("MuteVideoButton");
-        public Button MuteAudioButton = new Button().Id("MuteAudioButton");
-        public Button SwapCameraButton = new Button().Id("SwapCameraButton");
+        public Stack EndSessionButton = new Stack().Id("EndSessionButton");
+        public Stack MuteVideoButton = new Stack().Id("MuteVideoButton");
+        public Stack MuteAudioButton = new Stack().Id("MuteAudioButton");
+        public Stack SwapCameraButton = new Stack().Id("SwapCameraButton");
 
         public Action<string, string> MessageReceived;
 
