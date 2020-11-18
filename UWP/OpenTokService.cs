@@ -20,6 +20,11 @@ namespace Zebble.Plugin.Renderer
             //throw new NotImplementedException();
         }
 
+        public void DoInitSession(string apiKey, string sessionId, string userToken, string role)
+        {
+            throw new NotImplementedException();
+        }
+
         public void DoOnAudioPublishingEnabledChanged(bool value)
         {
             //throw new NotImplementedException();
