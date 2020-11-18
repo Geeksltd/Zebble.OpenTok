@@ -7,6 +7,8 @@ namespace Zebble.Plugin.Renderer
     public class OpenTokService : BaseOpenTokService.INativeImplementation
     {
         object syncLock = new object();
+        string role;
+
         Session Session;
         Publisher Publisher;
         Subscriber Subscriber;
@@ -17,15 +19,24 @@ namespace Zebble.Plugin.Renderer
         Android.Views.ViewGroup PublisherContianer;
         Android.Views.ViewGroup SubscriberContainer;
 
-        public void DoInitSession(string apiKey, string sessionId, string userToken)
+        public void DoInitSession(
+            string apiKey,
+            string sessionId,
+            string userToken,
+            string role = OpenTokRole.PUBLISHER)
         {
-            Zebble.Device.Permission.Camera.Request().RunInParallel();
-            Zebble.Device.Permission.Microphone.Request().RunInParallel();
+            this.role = role;
+
+            if (role != OpenTokRole.SUBSCRIBER)
+            {
+                Device.Permission.Camera.Request().RunInParallel();
+                Device.Permission.Microphone.Request().RunInParallel();
+            }
 
             if (Session != null) BaseOpenTokService.Current.EndSession();
 
             Session = new Session(Context, apiKey, sessionId);
-            HandleEvents();
+            HandleSessionEvents();
             Session.Connect(userToken);
         }
 
@@ -58,7 +69,7 @@ namespace Zebble.Plugin.Renderer
             ActivateStreamContainer(streamContainer, streamView);
         }
 
-        void HandleEvents()
+        void HandleSessionEvents()
         {
             Session.ConnectionDestroyed += OnConnectionDestroyed;
             Session.Connected += OnDidConnect;
@@ -114,15 +125,20 @@ namespace Zebble.Plugin.Renderer
         {
             lock (syncLock)
             {
-                if (Publisher != null || Session == null)
-                    return;
-
-                Publisher = new Publisher(Context, Environment.TickCount.ToString());
-                Publisher.SetStyle(BaseVideoRenderer.StyleVideoScale, BaseVideoRenderer.StyleVideoFill);
-
-                Session.Publish(Publisher);
-                ActivateStreamContainer(PublisherContianer, Publisher.View);
+                if (role == OpenTokRole.PUBLISHER) SetPublisher();
             }
+        }
+
+        void SetPublisher()
+        {
+            if (Publisher != null || Session == null)
+                return;
+
+            Publisher = new Publisher(Context, Environment.TickCount.ToString());
+            Publisher.SetStyle(BaseVideoRenderer.StyleVideoScale, BaseVideoRenderer.StyleVideoFill);
+
+            Session.Publish(Publisher);
+            ActivateStreamContainer(PublisherContianer, Publisher.View);
         }
 
         void OnStreamCreated(object sender, Session.StreamReceivedEventArgs e)
@@ -134,10 +150,7 @@ namespace Zebble.Plugin.Renderer
                     return;
 
                 Subscriber = new Subscriber(Context, stream);
-
-                Subscriber.Connected += OnSubscriberDidConnectToStream;
-                Subscriber.VideoEnabled += OnSubscriberVideoEnabled;
-                Subscriber.VideoDisabled += OnSubscriberVideoDisabled;
+                HandleSubscriptionEvents();
 
                 Subscriber.SetStyle(BaseVideoRenderer.StyleVideoScale, BaseVideoRenderer.StyleVideoFill);
 
@@ -145,7 +158,14 @@ namespace Zebble.Plugin.Renderer
             }
         }
 
-        private void OnSubscriberVideoEnabled(object sender, Subscriber.VideoEnabledEventArgs e)
+        void HandleSubscriptionEvents()
+        {
+            Subscriber.Connected += OnSubscriberDidConnectToStream;
+            Subscriber.VideoEnabled += OnSubscriberVideoEnabled;
+            Subscriber.VideoDisabled += OnSubscriberVideoDisabled;
+        }
+
+        void OnSubscriberVideoEnabled(object sender, Subscriber.VideoEnabledEventArgs e)
         {
             lock (syncLock)
             {
@@ -154,7 +174,7 @@ namespace Zebble.Plugin.Renderer
             }
         }
 
-        private void OnSubscriberVideoDisabled(object sender, Subscriber.VideoDisabledEventArgs e)
+        void OnSubscriberVideoDisabled(object sender, Subscriber.VideoDisabledEventArgs e)
         {
             DoOnVideoSubscriptionEnabledChanged(false);
         }
@@ -215,8 +235,11 @@ namespace Zebble.Plugin.Renderer
                     Session = null;
                 }
 
-                DeactivateStreamContainer(PublisherContianer);
-                PublisherContianer = null;
+                if (role != OpenTokRole.SUBSCRIBER)
+                {
+                    DeactivateStreamContainer(PublisherContianer);
+                    PublisherContianer = null;
+                }
 
                 DeactivateStreamContainer(SubscriberContainer);
                 SubscriberContainer = null;

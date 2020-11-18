@@ -17,7 +17,7 @@ namespace Zebble.Plugin
 
         public interface INativeImplementation
         {
-            void DoInitSession(string apiKey, string sessionId, string userToken);
+            void DoInitSession(string apiKey, string sessionId, string userToken, string role);
             void DoSwapCamera();
             void DoSetPublisherContainer(object container);
             void DoSetSubscriberContainer(object container);

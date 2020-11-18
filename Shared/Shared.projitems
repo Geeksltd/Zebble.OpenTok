@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)BaseOpenTokService.Implementation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)OpenTokRole.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)OpenTokView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BaseOpenTokService.cs" />
     <None Include="$(MSBuildThisFileDirectory)Icon.png" />

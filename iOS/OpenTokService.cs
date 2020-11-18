@@ -9,6 +9,8 @@ namespace Zebble.Plugin.Renderer
     public class OpenTokService : BaseOpenTokService.INativeImplementation
     {
         object syncLock = new object();
+        string role;
+
         OTSession Session;
         OTPublisher Publisher;
         OTSubscriber Subscriber;
@@ -16,12 +18,16 @@ namespace Zebble.Plugin.Renderer
         UIView PublisherContianer;
         UIView SubscriberContainer;
 
-        public void DoInitSession(string apiKey, string sessionId, string userToken)
+        public void DoInitSession(
+            string apiKey,
+            string sessionId,
+            string userToken,
+            string role = OpenTokRole.PUBLISHER)
         {
             if (Session != null) BaseOpenTokService.Current.EndSession();
-
+            this.role = role;
             Session = new OTSession(apiKey, sessionId, null);
-            HandleEvents();
+            HandleSessionEvents();
             Session.Init();
             Session.ConnectWithToken(userToken, out var error);
         }
@@ -56,7 +62,7 @@ namespace Zebble.Plugin.Renderer
             ActivateStreamContainer(streamContainer, streamView);
         }
 
-        void HandleEvents()
+        void HandleSessionEvents()
         {
             Session.ConnectionDestroyed += OnConnectionDestroyed;
             Session.DidConnect += OnDidConnect;
@@ -119,19 +125,24 @@ namespace Zebble.Plugin.Renderer
         {
             lock (syncLock)
             {
-                if (Publisher != null || Session == null)
-                    return;
-
-                Publisher = new OTPublisher(null, new OTPublisherSettings
-                {
-                    Name = "XamarinOpenTok",
-                    CameraFrameRate = OTCameraCaptureFrameRate.OTCameraCaptureFrameRate15FPS,
-                    CameraResolution = OTCameraCaptureResolution.High,
-                });
-
-                Session.Publish(Publisher, out var error);
-                ActivateStreamContainer(PublisherContianer, Publisher.View);
+                if (role == OpenTokRole.PUBLISHER)
+                    SetPublisher();
             }
+        }
+
+        private void SetPublisher()
+        {
+            if (Publisher != null || Session == null)
+                return;
+            Publisher = new OTPublisher(null, new OTPublisherSettings
+            {
+                Name = "XamarinOpenTok",
+                CameraFrameRate = OTCameraCaptureFrameRate.OTCameraCaptureFrameRate15FPS,
+                CameraResolution = OTCameraCaptureResolution.High,
+            });
+
+            Session.Publish(Publisher, out var error);
+            ActivateStreamContainer(PublisherContianer, Publisher.View);
         }
 
         void OnStreamCreated(object sender, OTSessionDelegateStreamEventArgs e)
@@ -142,13 +153,17 @@ namespace Zebble.Plugin.Renderer
                     return;
 
                 Subscriber = new OTSubscriber(e.Stream, null);
-
-                Subscriber.DidConnectToStream += OnSubscriberDidConnectToStream;
-                Subscriber.VideoDataReceived += OnSubscriberVideoDataReceived;
-                Subscriber.VideoEnabled += OnSubscriberVideoEnabled;
+                HandleSubscriptionEvents();
 
                 Session.Subscribe(Subscriber, out var error);
             }
+        }
+
+        private void HandleSubscriptionEvents()
+        {
+            Subscriber.DidConnectToStream += OnSubscriberDidConnectToStream;
+            Subscriber.VideoDataReceived += OnSubscriberVideoDataReceived;
+            Subscriber.VideoEnabled += OnSubscriberVideoEnabled;
         }
 
         private void OnSubscriberVideoEnabled(object sender, OTSubscriberKitDelegateVideoEventReasonEventArgs e)

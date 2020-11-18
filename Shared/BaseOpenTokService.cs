@@ -15,6 +15,7 @@
         bool videoSubscriptionEnabled;
         bool audioSubscriptionEnabled;
         bool subscriberVideoEnabled;
+        string role;
 
         internal readonly AsyncEvent VideoPublishingEnabledChanged = new AsyncEvent();
         internal readonly AsyncEvent AudioPublishingEnabledChanged = new AsyncEvent();
@@ -81,17 +82,28 @@
             }
         }
 
-        public void InitSession(string sessionId, string userToken)
+        public string Role
+        {
+            get => role;
+            set
+            {
+                if (role == value) return;
+                role = value;
+            }
+        }
+
+        public void InitSession(string sessionId, string userToken, string role)
         {
             if (!ValidateSession(sessionId, userToken)) return;
 
-            VideoPublishingEnabled = true;
-            AudioPublishingEnabled = true;
+            Role = role;
+            VideoPublishingEnabled = role != OpenTokRole.SUBSCRIBER;
+            AudioPublishingEnabled = role != OpenTokRole.SUBSCRIBER;
             VideoSubscriptionEnabled = true;
             AudioSubscriptionEnabled = true;
             SubscriberVideoEnabled = true;
 
-            Implementation.DoInitSession(ApiKey, sessionId, userToken);
+            Implementation.DoInitSession(ApiKey, sessionId, userToken, role);
 
             VideoPublishingEnabledChanged.Handle(() => OnVideoPublishingEnabledChanged());
             AudioPublishingEnabledChanged.Handle(() => OnAudioPublishingEnabledChanged());

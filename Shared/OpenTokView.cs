@@ -10,6 +10,7 @@
     {
         string sessionId;
         string userToken;
+        string role;
 
         public Canvas PublisherContianer = new Canvas().Id("PublisherContianer");
         public Canvas SubscriberContianer = new Canvas().Id("SubscriberContianer");
@@ -38,9 +39,44 @@
             }
         }
 
+        public string Role
+        {
+            get => role ?? (role = OpenTokRole.PUBLISHER); set
+            {
+                if (role == value) return;
+                if (OpenTokRole.Validate(value))
+                    role = value;
+            }
+        }
+
         public override async Task OnInitializing()
         {
             await base.OnInitializing();
+
+            HandleGestures();
+
+            await AddViews();
+
+            await WhenShownOrPageRevisited(() => Thread.UI.Run(() => OnShownOrPageRevisited()));
+        }
+
+        private async Task AddViews()
+        {
+            await Add(SubscriberContianer);
+
+            if (role == OpenTokRole.SUBSCRIBER) return;
+
+            await Add(PublisherContianer);
+            await Add(EndSessionButton);
+            await Add(MuteVideoButton);
+            await Add(MuteAudioButton);
+            await Add(SwapCameraButton);
+
+        }
+
+        private void HandleGestures()
+        {
+            if (role == OpenTokRole.SUBSCRIBER) return;
 
             MuteVideoButton.On(x => x.Tapped, () => BaseOpenTokService.Current.VideoPublishingEnabled = !BaseOpenTokService.Current.VideoPublishingEnabled);
 
@@ -49,23 +85,15 @@
             EndSessionButton.On(x => x.Tapped, () => BaseOpenTokService.Current.EndSession());
 
             SwapCameraButton.On(x => x.Tapped, () => BaseOpenTokService.Current.SwapCamera());
-
-            await Add(PublisherContianer);
-            await Add(SubscriberContianer);
-            await Add(EndSessionButton);
-            await Add(MuteVideoButton);
-            await Add(MuteAudioButton);
-            await Add(SwapCameraButton);
-
-            await WhenShown(() => Thread.UI.Run(() => OnShown()));
         }
 
-        public void OnShown()
+        public void OnShownOrPageRevisited()
         {
             BaseOpenTokService.Current.SignalReceived += MessageReceived;
-            BaseOpenTokService.Current.SetPublisherContainer(PublisherContianer.Native());
+            if (Role != OpenTokRole.SUBSCRIBER)
+                BaseOpenTokService.Current.SetPublisherContainer(PublisherContianer.Native());
             BaseOpenTokService.Current.SetSubscriberContainer(SubscriberContianer.Native());
-            BaseOpenTokService.Current.InitSession(sessionId, userToken);
+            BaseOpenTokService.Current.InitSession(sessionId, userToken, Role);
         }
 
         public void SendEmojiToAll(string name)
