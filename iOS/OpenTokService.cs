@@ -186,6 +186,8 @@ namespace Zebble.Plugin.Renderer
 
         void OnStreamDestroyed(object sender, OTSessionDelegateStreamEventArgs e)
         {
+            if (PublisherContianer == null || SubscriberContainer == null) return;
+
             PublisherContianer.InvokeOnMainThread(() =>
             {
                 DeactivateStreamContainer(PublisherContianer);
@@ -193,7 +195,7 @@ namespace Zebble.Plugin.Renderer
             });
         }
 
-        void OnConnectionDestroyed(object sender, OTSessionDelegateConnectionEventArgs e) => BaseOpenTokService.Current.EndSession();
+        void OnConnectionDestroyed(object sender, OTSessionDelegateConnectionEventArgs e) => BaseOpenTokService.Current?.EndSession();
 
         public void DoEndSession()
         {
