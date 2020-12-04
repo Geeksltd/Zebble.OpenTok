@@ -192,8 +192,6 @@ namespace Zebble.Plugin.Renderer
 
         void OnStreamDestroyed(object sender, Session.StreamDroppedEventArgs e)
         {
-            if (PublisherContianer == null || SubscriberContainer == null) return;
-
             DeactivateStreamContainer(PublisherContianer);
             DeactivateStreamContainer(SubscriberContainer);
         }

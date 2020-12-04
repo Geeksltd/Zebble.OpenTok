@@ -186,11 +186,13 @@ namespace Zebble.Plugin.Renderer
 
         void OnStreamDestroyed(object sender, OTSessionDelegateStreamEventArgs e)
         {
-            if (PublisherContianer == null || SubscriberContainer == null) return;
-
-            PublisherContianer.InvokeOnMainThread(() =>
+            PublisherContianer?.InvokeOnMainThread(() =>
             {
                 DeactivateStreamContainer(PublisherContianer);
+            });
+
+            SubscriberContainer?.InvokeOnMainThread(() =>
+            {
                 DeactivateStreamContainer(SubscriberContainer);
             });
         }
@@ -234,14 +236,18 @@ namespace Zebble.Plugin.Renderer
                     Session = null;
                 }
 
-                PublisherContianer.InvokeOnMainThread(() =>
+                PublisherContianer?.InvokeOnMainThread(() =>
                 {
                     DeactivateStreamContainer(PublisherContianer);
                     PublisherContianer = null;
+                });
 
+                SubscriberContainer?.InvokeOnMainThread(() =>
+                {
                     DeactivateStreamContainer(SubscriberContainer);
                     SubscriberContainer = null;
                 });
+               
             }
         }
 
