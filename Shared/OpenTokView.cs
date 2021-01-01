@@ -98,7 +98,7 @@
 
         public void SendEmojiToAll(string name)
         {
-            BaseOpenTokService.Current.SendSignallToAllSubscribers("Emoji", name);
+            BaseOpenTokService.Current.SendSignalToAllSubscribers("Emoji", name);
         }
     }
 }

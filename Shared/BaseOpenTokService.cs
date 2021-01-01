@@ -1,14 +1,15 @@
 ﻿namespace Zebble.Plugin
 {
     using System;
-    using Zebble;
+    using Config = Zebble.Config;
+    using Olive;
 
     public partial class BaseOpenTokService
     {
 
         internal static string ApiKey => Config.Get("OpenTok.Api.Key");
-        internal static string SessionUrl => Config.Get("OpenTok.Api.Session.url");
-        internal static string ToeknUrl => Config.Get("OpenTok.Api.Token.url");
+        internal static string SessionUrl => Config.Get("OpenTok.Api.Session.Url");
+        internal static string TokenUrl => Config.Get("OpenTok.Api.Token.Url");
 
         bool videoPublishingEnabled;
         bool audioPublishingEnabled;
@@ -94,7 +95,7 @@
 
         public void InitSession(string sessionId, string userToken, string role)
         {
-            if (!ValidateSession(sessionId, userToken)) return;
+            if (!IsSessionValid(sessionId, userToken)) return;
 
             Role = role;
             VideoPublishingEnabled = role != OpenTokRole.SUBSCRIBER;
@@ -105,27 +106,27 @@
 
             Implementation.DoInitSession(ApiKey, sessionId, userToken, role);
 
-            VideoPublishingEnabledChanged.Handle(() => OnVideoPublishingEnabledChanged());
-            AudioPublishingEnabledChanged.Handle(() => OnAudioPublishingEnabledChanged());
-            VideoSubscriptionEnabledChanged.Handle(() => OnVideoSubscriptionEnabledChanged());
-            AudioSubscriptionEnabledChanged.Handle(() => OnAudioSubscriptionEnabledChanged());
+            VideoPublishingEnabledChanged.Handle(OnVideoPublishingEnabledChanged);
+            AudioPublishingEnabledChanged.Handle(OnAudioPublishingEnabledChanged);
+            VideoSubscriptionEnabledChanged.Handle(OnVideoSubscriptionEnabledChanged);
+            AudioSubscriptionEnabledChanged.Handle(OnAudioSubscriptionEnabledChanged);
         }
 
-        public bool ValidateSession(string sessionId, string userToken)
+        public bool IsSessionValid(string sessionId, string userToken)
         {
-            if (ApiKey.LacksValue())
+            if (ApiKey.IsEmpty())
             {
                 Device.Log.Error("The OpenTok api key is not provided. Add an entry to your config.xml for the key 'OpenTok.Api.Key'. You can find the project Api key in you OpenTok project dashboard.");
                 return false;
             }
 
-            if (sessionId.LacksValue())
+            if (sessionId.IsEmpty())
             {
                 Device.Log.Error("The session id is not provided.");
                 return false;
             }
 
-            if (userToken.LacksValue())
+            if (userToken.IsEmpty())
             {
                 Device.Log.Error("The user token is not provided.");
                 return false;
@@ -169,7 +170,7 @@
             SubscriberVideoEnabled = false;
         }
 
-        public void SendSignallToAllSubscribers(string type, string message)
+        public void SendSignalToAllSubscribers(string type, string message)
         {
             Implementation.DoSendSignalToAllSubscribers(type, message);
         }
