@@ -1,7 +1,6 @@
 ﻿namespace Zebble.Plugin
 {
     using System;
-    using Config = Zebble.Config;
     using Olive;
 
     public partial class BaseOpenTokService
@@ -116,19 +115,19 @@
         {
             if (ApiKey.IsEmpty())
             {
-                Device.Log.Error("The OpenTok api key is not provided. Add an entry to your config.xml for the key 'OpenTok.Api.Key'. You can find the project Api key in you OpenTok project dashboard.");
+                Log.For(this).Error(null, "The OpenTok api key is not provided. Add an entry to your config.xml for the key 'OpenTok.Api.Key'. You can find the project Api key in you OpenTok project dashboard.");
                 return false;
             }
 
             if (sessionId.IsEmpty())
             {
-                Device.Log.Error("The session id is not provided.");
+                Log.For(this).Error(null, "The session id is not provided.");
                 return false;
             }
 
             if (userToken.IsEmpty())
             {
-                Device.Log.Error("The user token is not provided.");
+                Log.For(this).Error(null, "The user token is not provided.");
                 return false;
             }
 
