@@ -49,7 +49,7 @@ namespace Zebble.Plugin.Renderer
 
         public void DoSetPublisherContainer(object container)
         {
-            var streamContainer = ((Android.Views.ViewGroup)container);
+            var streamContainer = (Android.Views.ViewGroup)container;
             Android.Views.View streamView = null;
 
             PublisherContianer = streamContainer;
@@ -60,7 +60,7 @@ namespace Zebble.Plugin.Renderer
 
         public void DoSetSubscriberContainer(object container)
         {
-            var streamContainer = ((Android.Views.ViewGroup)container);
+            var streamContainer = (Android.Views.ViewGroup)container;
             Android.Views.View streamView = null;
 
             SubscriberContainer = streamContainer;
